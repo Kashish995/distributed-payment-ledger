@@ -36,7 +36,14 @@ CREATE TABLE ledger_entries (
 
     CONSTRAINT fk_account
         FOREIGN KEY(account_id)
-        REFERENCES accounts(id)
+        REFERENCES accounts(id),
+
+    CONSTRAINT chk_entry_amount_sign
+        CHECK (
+            (entry_type = 'DEBIT' AND amount < 0)
+            OR
+            (entry_type = 'CREDIT' AND amount > 0)
+        )
 );
 
 -- ============================
