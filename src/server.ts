@@ -4,7 +4,7 @@ import { AccountRepository } from "./repositories/AccountRepository";
 
 const app = express();
 const PORT = Number(process.env.PORT) || 3000;
-const accountRepository = new AccountRepository();
+
 
 app.get("/health", async (_, res) => {
   const result = await pool.query("SELECT NOW()");
@@ -20,11 +20,7 @@ async function startServer() {
     await pool.query("SELECT 1");
     console.log("✅ Connected to PostgreSQL");
 
-    const balance = await accountRepository.getAccountBalance(
-      "00000000-0000-0000-0000-000000000000"
-    );
-
-    console.log("Balance:", balance);
+   
 
     app.listen(PORT, () => {
       console.log(`🚀 Server running on port ${PORT}`);

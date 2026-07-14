@@ -1,15 +1,19 @@
 import { AccountRepository } from "../repositories/AccountRepository";
+import { InsufficientFundsError } from "../errors/InsufficientFundsError";
 
 export class PaymentService {
-  private accountRepository = new AccountRepository();
+  constructor(
+  private readonly accountRepository = new AccountRepository()
+) {}
 
-  async validateSufficientBalance(accountId: string, amount: number) {
+  async validateSufficientBalance(
+    accountId: string,
+    amount: number,
+  ): Promise<void> {
     const balance = await this.accountRepository.getAccountBalance(accountId);
 
     if (balance < amount) {
-      throw new Error("Insufficient funds");
+      throw new InsufficientFundsError();
     }
-
-    return balance;
   }
 }
