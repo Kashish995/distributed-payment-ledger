@@ -13,6 +13,7 @@ export class PaymentService {
   constructor(
     private readonly accountRepository = new AccountRepository(),
     private readonly paymentRepository = new PaymentRepository(),
+    private readonly databasePool = pool,
   ) {}
 
   public async processPayment({
@@ -21,18 +22,14 @@ export class PaymentService {
     amount,
     currency,
   }: ProcessPaymentRequest): Promise<void> {
-    const client: PoolClient = await pool.connect();
+    const client: PoolClient = await this.databasePool.connect();
 
     try {
       await client.query("BEGIN");
 
       await this.accountRepository.lockAccount(client, senderAccountId);
 
-      await this.validateSufficientBalance(
-        client,
-        senderAccountId,
-        amount,
-      );
+      await this.validateSufficientBalance(client, senderAccountId, amount);
 
       const transactionId = randomUUID();
 
