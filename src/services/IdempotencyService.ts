@@ -5,6 +5,7 @@ import {
   IDEMPOTENCY_STATUS,
   IdempotencyStatus,
 } from "../constants/idempotency";
+import { IdempotencyConflictError } from "../errors/IdempotencyConflictError";
 
 export class IdempotencyService {
   private readonly redis: Redis;
@@ -20,7 +21,7 @@ export class IdempotencyService {
     return `${IdempotencyService.KEY_PREFIX}:${idempotencyKey}`;
   }
 
-  async acquireLock(idempotencyKey: string): Promise<boolean> {
+  async acquireLock(idempotencyKey: string): Promise<void> {
     const key = this.buildKey(idempotencyKey);
 
     const result = await this.redis.set(
@@ -28,10 +29,12 @@ export class IdempotencyService {
       IDEMPOTENCY_STATUS.IN_PROGRESS,
       "EX",
       IdempotencyService.TTL_SECONDS,
-      "NX"
+      "NX",
     );
 
-    return result === "OK";
+    if (result !== "OK") {
+      throw new IdempotencyConflictError();
+    }
   }
 
   async markResolved(idempotencyKey: string): Promise<void> {
@@ -41,13 +44,11 @@ export class IdempotencyService {
       key,
       IDEMPOTENCY_STATUS.RESOLVED,
       "EX",
-      IdempotencyService.TTL_SECONDS
+      IdempotencyService.TTL_SECONDS,
     );
   }
 
-  async getStatus(
-    idempotencyKey: string
-  ): Promise<IdempotencyStatus | null> {
+  async getStatus(idempotencyKey: string): Promise<IdempotencyStatus | null> {
     const key = this.buildKey(idempotencyKey);
 
     const status = await this.redis.get(key);

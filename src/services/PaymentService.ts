@@ -1,6 +1,8 @@
-import { pool } from "../config/db";
-import { PoolClient } from "pg";
 import { randomUUID } from "crypto";
+import { PoolClient } from "pg";
+
+import { pool } from "../config/db";
+import { ProcessPaymentRequest } from "../types/payment";
 
 import { AccountRepository } from "../repositories/AccountRepository";
 import { PaymentRepository } from "../repositories/PaymentRepository";
@@ -13,39 +15,32 @@ export class PaymentService {
     private readonly paymentRepository = new PaymentRepository(),
   ) {}
 
-  public async processPayment(
-    fromAccountId: string,
-    toAccountId: string,
-    amount: number,
-    currency: string,
-  ): Promise<void> {
+  public async processPayment({
+    senderAccountId,
+    receiverAccountId,
+    amount,
+    currency,
+  }: ProcessPaymentRequest): Promise<void> {
     const client: PoolClient = await pool.connect();
 
     try {
       await client.query("BEGIN");
 
-      await this.accountRepository.lockAccount(client, fromAccountId);
+      await this.accountRepository.lockAccount(client, senderAccountId);
 
-      const balance = await this.accountRepository.getAccountBalance(
+      await this.validateSufficientBalance(
         client,
-        fromAccountId,
+        senderAccountId,
+        amount,
       );
-
-      console.log("From Account:", fromAccountId);
-      console.log("Requested Amount:", amount);
-      console.log("Current Balance:", balance);
-
-      if (balance < amount) {
-        throw new InsufficientFundsError();
-      }
 
       const transactionId = randomUUID();
 
       await this.paymentRepository.createLedgerEntries(
         client,
         transactionId,
-        fromAccountId,
-        toAccountId,
+        senderAccountId,
+        receiverAccountId,
         amount,
         currency,
       );
