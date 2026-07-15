@@ -54,4 +54,49 @@ describe("IdempotencyService", () => {
       );
     });
   });
+
+  describe("markResolved", () => {
+    it("should mark the request as resolved", async () => {
+      const idempotencyService = new IdempotencyService(mockRedis as any);
+
+      mockRedis.set.mockResolvedValue("OK");
+
+      await idempotencyService.markResolved("payment-001");
+
+      expect(mockRedis.set).toHaveBeenCalledTimes(1);
+
+      expect(mockRedis.set).toHaveBeenCalledWith(
+        "idempotency:payment-001",
+        "RESOLVED",
+        "EX",
+        24 * 60 * 60,
+      );
+    });
+  });
+
+  describe("getStatus", () => {
+    it("should return the stored status", async () => {
+      const idempotencyService = new IdempotencyService(mockRedis as any);
+
+      mockRedis.get.mockResolvedValue("RESOLVED");
+
+      const status = await idempotencyService.getStatus("payment-001");
+
+      expect(status).toBe("RESOLVED");
+
+      expect(mockRedis.get).toHaveBeenCalledWith("idempotency:payment-001");
+    });
+
+    it("should return null when the idempotency key does not exist", async () => {
+      const idempotencyService = new IdempotencyService(mockRedis as any);
+
+      mockRedis.get.mockResolvedValue(null);
+
+      const status = await idempotencyService.getStatus("payment-001");
+
+      expect(status).toBeNull();
+
+      expect(mockRedis.get).toHaveBeenCalledWith("idempotency:payment-001");
+    });
+  });
 });
