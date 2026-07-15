@@ -75,5 +75,42 @@ describe("PaymentService", () => {
 
       expect(mockClient.release).toHaveBeenCalledTimes(1);
     });
+
+    it("should rollback the transaction when the sender has insufficient funds", async () => {
+      const paymentService = new PaymentService(
+        mockAccountRepository as any,
+        mockPaymentRepository as any,
+        mockDatabasePool as any,
+      );
+
+      mockDatabasePool.connect.mockResolvedValue(mockClient);
+
+      mockAccountRepository.lockAccount.mockResolvedValue(undefined);
+
+      mockAccountRepository.getAccountBalance.mockResolvedValue(50);
+
+      mockClient.query.mockResolvedValue(undefined);
+
+      await expect(
+        paymentService.processPayment({
+          senderAccountId: "sender-account-id",
+          receiverAccountId: "receiver-account-id",
+          amount: 100,
+          currency: "INR",
+        }),
+      ).rejects.toThrow("Insufficient funds");
+
+      expect(mockDatabasePool.connect).toHaveBeenCalledTimes(1);
+
+      expect(mockClient.query).toHaveBeenNthCalledWith(1, "BEGIN");
+
+      expect(mockClient.query).toHaveBeenNthCalledWith(2, "ROLLBACK");
+
+      expect(mockClient.query).not.toHaveBeenCalledWith("COMMIT");
+
+      expect(mockPaymentRepository.createLedgerEntries).not.toHaveBeenCalled();
+
+      expect(mockClient.release).toHaveBeenCalledTimes(1);
+    });
   });
 });
