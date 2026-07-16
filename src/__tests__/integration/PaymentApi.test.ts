@@ -1,12 +1,11 @@
 import request from "supertest";
-import { randomUUID } from "crypto";
 import redis from "../../config/redis";
-import { resetDatabase, clearRedis } from "../utils/testEnvironment";
+import { AccountRepository } from "../../repositories/AccountRepository";
+import { testPool } from "./test-db";
 
 import app from "../../app";
 
 describe("Payment API", () => {
-
   afterAll(async () => {
     await redis.quit();
   });
@@ -28,6 +27,79 @@ describe("Payment API", () => {
       expect(response.body).toEqual({
         message: "Payment processed successfully.",
       });
+    });
+
+    it("should reject duplicate idempotency key", async () => {
+      const paymentRequest = {
+        senderAccountId: "00000000-0000-0000-0000-000000000000",
+        receiverAccountId: "00000000-0000-0000-0000-000000000001",
+        amount: 100,
+        currency: "INR",
+      };
+
+      const idempotencyKey = "payment-api-duplicate-test";
+
+      const firstResponse = await request(app)
+        .post("/payments")
+        .set("Idempotency-Key", idempotencyKey)
+        .send(paymentRequest);
+
+      expect(firstResponse.status).toBe(201);
+
+      const secondResponse = await request(app)
+        .post("/payments")
+        .set("Idempotency-Key", idempotencyKey)
+        .send(paymentRequest);
+
+      expect(secondResponse.status).toBe(409);
+
+      expect(secondResponse.body).toEqual({
+        success: false,
+        message:
+          "A request with the same Idempotency-Key is already being processed.",
+      });
+    });
+
+    it("should reject payment with insufficient funds", async () => {
+      const paymentRequest = {
+        senderAccountId: "00000000-0000-0000-0000-000000000000",
+        receiverAccountId: "00000000-0000-0000-0000-000000000001",
+        amount: 5000,
+        currency: "INR",
+      };
+
+      const response = await request(app)
+        .post("/payments")
+        .set("Idempotency-Key", "payment-api-insufficient-funds")
+        .send(paymentRequest);
+
+      expect(response.status).toBe(400);
+
+      expect(response.body).toEqual({
+        success: false,
+        message: "Insufficient funds",
+      });
+
+      const client = await testPool.connect();
+
+      try {
+        const accountRepository = new AccountRepository();
+
+        const aliceBalance = await accountRepository.getAccountBalance(
+          client,
+          "00000000-0000-0000-0000-000000000000",
+        );
+
+        const bobBalance = await accountRepository.getAccountBalance(
+          client,
+          "00000000-0000-0000-0000-000000000001",
+        );
+
+        expect(aliceBalance).toBe(1000);
+        expect(bobBalance).toBe(0);
+      } finally {
+        client.release();
+      }
     });
   });
 });
