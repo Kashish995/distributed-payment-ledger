@@ -5,7 +5,7 @@ module.exports = {
 
   roots: ["<rootDir>/src"],
 
-  testMatch: ["**/__tests__/*.test.ts"],
+  testMatch: ["**/__tests__/integration/**/*.test.ts"],
 
   moduleFileExtensions: ["ts", "js", "json"],
 
@@ -13,5 +13,11 @@ module.exports = {
 
   setupFiles: ["<rootDir>/src/__tests__/setup.ts"],
 
-  collectCoverageFrom: ["src/**/*.ts", "!src/server.ts", "!src/types/**"],
+  setupFilesAfterEnv: [
+    "<rootDir>/src/__tests__/integration/setupIntegration.ts",
+  ],
+
+  maxWorkers: 1,
+  
+  collectCoverage: false,
 };

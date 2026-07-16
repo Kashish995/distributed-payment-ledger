@@ -4,13 +4,21 @@
   "description": "",
   "main": "index.js",
    "scripts": {
-    "dev": "...",
-    "build": "...",
-    "start": "...",
-    "test": "jest",
-    "test:watch": "jest --watch",
-    "test:coverage": "jest --coverage"
-  },
+  "dev": "...",
+  "build": "...",
+  "start": "...",
+
+  "test": "npm run test:unit && npm run test:integration",
+
+  "test:unit": "jest --config jest.config.js",
+
+  "test:integration": "jest --config jest.integration.config.js",
+
+  "test:watch": "jest --watch",
+
+  "test:coverage": "jest --coverage"
+},
+
   "keywords": [],
   "author": "",
   "license": "ISC",

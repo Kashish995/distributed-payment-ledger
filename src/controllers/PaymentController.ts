@@ -4,10 +4,12 @@ import { PaymentService } from "../services/PaymentService";
 
 import { IdempotencyService } from "../services/IdempotencyService";
 
-const paymentService = new PaymentService();
-const idempotencyService = new IdempotencyService();
-
 export class PaymentController {
+  constructor(
+    private readonly paymentService = new PaymentService(),
+    private readonly idempotencyService = new IdempotencyService(),
+  ) {}
+
   async processPayment(
     req: Request,
     res: Response,
@@ -16,7 +18,7 @@ export class PaymentController {
     try {
       const { senderAccountId, receiverAccountId, amount, currency } = req.body;
 
-      await paymentService.processPayment({
+      await this.paymentService.processPayment({
         senderAccountId,
         receiverAccountId,
         amount,
@@ -24,7 +26,7 @@ export class PaymentController {
       });
 
       if (req.idempotencyKey) {
-        await idempotencyService.markResolved(req.idempotencyKey);
+        await this.idempotencyService.markResolved(req.idempotencyKey);
       }
 
       res.status(201).json({
