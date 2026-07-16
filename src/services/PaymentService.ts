@@ -9,6 +9,7 @@ import { PaymentRepository } from "../repositories/PaymentRepository";
 
 import { InsufficientFundsError } from "../errors/InsufficientFundsError";
 
+import logger from "../config/logger";
 export class PaymentService {
   constructor(
     private readonly accountRepository = new AccountRepository(),
@@ -43,8 +44,31 @@ export class PaymentService {
       );
 
       await client.query("COMMIT");
+
+      logger.info(
+        {
+          transactionId,
+          senderAccountId,
+          receiverAccountId,
+          amount,
+          currency,
+        },
+        "Payment processed successfully",
+      );
     } catch (error) {
       await client.query("ROLLBACK");
+
+      logger.error(
+        {
+          error,
+          senderAccountId,
+          receiverAccountId,
+          amount,
+          currency,
+        },
+        "Payment processing failed",
+      );
+
       throw error;
     } finally {
       client.release();

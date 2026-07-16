@@ -101,5 +101,39 @@ describe("Payment API", () => {
         client.release();
       }
     });
+
+    it("should reject invalid payment requests", async () => {
+      const response = await request(app)
+        .post("/payments")
+        .set("Idempotency-Key", "invalid-payment-test")
+        .send({
+          senderAccountId: "abc",
+          receiverAccountId: "xyz",
+          amount: -10,
+          currency: "RUPEES",
+        });
+
+      expect(response.status).toBe(400);
+
+      expect(response.body.success).toBe(false);
+      expect(response.body.message).toBe("Validation failed");
+
+      expect(response.body.errors).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            field: "senderAccountId",
+          }),
+          expect.objectContaining({
+            field: "receiverAccountId",
+          }),
+          expect.objectContaining({
+            field: "amount",
+          }),
+          expect.objectContaining({
+            field: "currency",
+          }),
+        ]),
+      );
+    });
   });
 });

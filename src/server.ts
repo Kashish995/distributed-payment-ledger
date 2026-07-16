@@ -1,5 +1,6 @@
 import { pool } from "./config/db";
 import app from "./app";
+import logger from "./config/logger";
 
 const PORT = Number(process.env.PORT) || 3000;
 
@@ -17,13 +18,13 @@ async function startServer(): Promise<void> {
   try {
     await pool.query("SELECT 1");
 
-    console.log("✅ Connected to PostgreSQL");
+    logger.info("Connected to PostgreSQL");
 
     app.listen(PORT, () => {
-      console.log(`🚀 Server running on port ${PORT}`);
+      logger.info(`Server running on port ${PORT}`);
     });
   } catch (error) {
-    console.error("❌ Failed to connect to PostgreSQL", error);
+    logger.error(error);
     process.exit(1);
   }
 }

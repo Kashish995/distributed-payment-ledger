@@ -1,0 +1,19 @@
+config:
+  target: "http://localhost:3000"
+
+  phases:
+    - duration: 30
+      arrivalRate: 20
+
+scenarios:
+  - flow:
+      - post:
+          url: "/payments"
+          headers:
+            Content-Type: "application/json"
+            Idempotency-Key: "{{ $uuid }}"
+          json:
+            senderAccountId: "00000000-0000-0000-0000-000000000000"
+            receiverAccountId: "00000000-0000-0000-0000-000000000001"
+            amount: 1
+            currency: "INR"
