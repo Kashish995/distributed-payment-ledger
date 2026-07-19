@@ -8,7 +8,7 @@ export class PaymentRepository {
     fromAccountId: string,
     toAccountId: string,
     amount: number,
-    currency: string
+    currency: string,
   ): Promise<void> {
     const query = `
       INSERT INTO ledger_entries (
@@ -34,5 +34,32 @@ export class PaymentRepository {
       toAccountId,
       amount,
     ]);
+  }
+
+  async getPayments(client: PoolClient) {
+    const query = `
+  SELECT
+    debit.transaction_id AS "transactionId",
+    debit.account_id AS "senderAccountId",
+    credit.account_id AS "receiverAccountId",
+    ABS(debit.amount) AS amount,
+    debit.currency AS currency,
+    debit.created_at AS "createdAt"
+
+  FROM ledger_entries debit
+
+  INNER JOIN ledger_entries credit
+    ON debit.transaction_id = credit.transaction_id
+
+  WHERE
+    debit.entry_type = 'DEBIT'
+    AND credit.entry_type = 'CREDIT'
+
+  ORDER BY debit.created_at DESC;
+`;
+
+    const result = await client.query(query);
+
+    return result.rows;
   }
 }

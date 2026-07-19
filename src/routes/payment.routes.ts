@@ -60,4 +60,21 @@ router.post(
   paymentController.processPayment.bind(paymentController),
 );
 
+/**
+ * @openapi
+ * /payments:
+ *   get:
+ *     summary: Get payment history
+ *     description: Returns all processed payments reconstructed from the immutable ledger.
+ *     tags:
+ *       - Payments
+ *     responses:
+ *       200:
+ *         description: List of processed payments.
+ */
+router.get(
+  "/",
+  paymentController.getPayments.bind(paymentController),
+);
+
 export default router;

@@ -36,4 +36,21 @@ export class PaymentController {
       next(error);
     }
   }
+
+  async getPayments(
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ): Promise<void> {
+    try {
+      const payments = await this.paymentService.getPayments();
+
+      res.status(200).json({
+        success: true,
+        data: payments,
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
 }

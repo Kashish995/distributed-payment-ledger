@@ -10,6 +10,7 @@ import { PaymentRepository } from "../repositories/PaymentRepository";
 import { InsufficientFundsError } from "../errors/InsufficientFundsError";
 
 import logger from "../config/logger";
+
 export class PaymentService {
   constructor(
     private readonly accountRepository = new AccountRepository(),
@@ -70,6 +71,17 @@ export class PaymentService {
       );
 
       throw error;
+    } finally {
+      client.release();
+    }
+  }
+
+  // NEW METHOD
+  public async getPayments() {
+    const client: PoolClient = await this.databasePool.connect();
+
+    try {
+      return await this.paymentRepository.getPayments(client);
     } finally {
       client.release();
     }
