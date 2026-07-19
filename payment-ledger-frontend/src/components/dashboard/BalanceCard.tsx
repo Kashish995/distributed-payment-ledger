@@ -9,6 +9,10 @@ interface BalanceCardProps {
 export default function BalanceCard({
   accounts,
 }: BalanceCardProps) {
+  const visibleAccounts = accounts.filter(
+    (account) => account.ownerName !== "SYSTEM"
+  );
+
   return (
     <Card>
       <div className="space-y-5">
@@ -23,7 +27,7 @@ export default function BalanceCard({
         </div>
 
         <div className="space-y-4">
-          {accounts.map((account) => (
+          {visibleAccounts.map((account) => (
             <div
               key={account.id}
               className="flex items-center justify-between rounded-lg border border-slate-200 p-4"
@@ -40,7 +44,10 @@ export default function BalanceCard({
 
               <div className="text-right">
                 <p className="text-xl font-bold">
-                  ₹{account.balance}
+                  {new Intl.NumberFormat("en-IN", {
+                    style: "currency",
+                    currency: account.currency,
+                  }).format(Number(account.balance))}
                 </p>
               </div>
             </div>

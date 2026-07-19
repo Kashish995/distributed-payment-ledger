@@ -32,23 +32,34 @@ export default function RecentTransactions({
             >
               <div>
                 <p className="font-semibold">
-                  {payment.senderAccountId.slice(-4)} →{" "}
-                  {payment.receiverAccountId.slice(-4)}
+                  {payment.senderName} → {payment.receiverName}
                 </p>
 
                 <p className="text-sm text-gray-500">
-                  {new Date(payment.createdAt).toLocaleString()}
+                  {new Intl.DateTimeFormat("en-IN", {
+                    dateStyle: "medium",
+                    timeStyle: "short",
+                  }).format(new Date(payment.createdAt))}
                 </p>
               </div>
 
               <div className="text-right">
                 <p className="font-bold">
-                  ₹{payment.amount}
+                  {new Intl.NumberFormat("en-IN", {
+                    style: "currency",
+                    currency: payment.currency,
+                  }).format(Number(payment.amount))}
                 </p>
               </div>
             </div>
           ))}
         </div>
+
+        {recentPayments.length === 0 && (
+          <p className="py-8 text-center text-sm text-gray-500">
+            No transactions yet.
+          </p>
+        )}
       </div>
     </Card>
   );

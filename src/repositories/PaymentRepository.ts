@@ -38,24 +38,37 @@ export class PaymentRepository {
 
   async getPayments(client: PoolClient) {
     const query = `
-  SELECT
-    debit.transaction_id AS "transactionId",
-    debit.account_id AS "senderAccountId",
-    credit.account_id AS "receiverAccountId",
-    ABS(debit.amount) AS amount,
-    debit.currency AS currency,
-    debit.created_at AS "createdAt"
+SELECT
+  debit.transaction_id AS "transactionId",
 
-  FROM ledger_entries debit
+  debit.account_id AS "senderAccountId",
+  sender.owner_name AS "senderName",
 
-  INNER JOIN ledger_entries credit
-    ON debit.transaction_id = credit.transaction_id
+  credit.account_id AS "receiverAccountId",
+  receiver.owner_name AS "receiverName",
 
-  WHERE
-    debit.entry_type = 'DEBIT'
-    AND credit.entry_type = 'CREDIT'
+  ABS(debit.amount) AS amount,
 
-  ORDER BY debit.created_at DESC;
+  debit.currency AS currency,
+
+  debit.created_at AS "createdAt"
+
+FROM ledger_entries debit
+
+INNER JOIN ledger_entries credit
+  ON debit.transaction_id = credit.transaction_id
+
+INNER JOIN accounts sender
+  ON sender.id = debit.account_id
+
+INNER JOIN accounts receiver
+  ON receiver.id = credit.account_id
+
+WHERE
+  debit.entry_type = 'DEBIT'
+  AND credit.entry_type = 'CREDIT'
+
+ORDER BY debit.created_at DESC;
 `;
 
     const result = await client.query(query);
