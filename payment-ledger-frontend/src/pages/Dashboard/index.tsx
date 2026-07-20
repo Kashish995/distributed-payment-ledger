@@ -2,8 +2,11 @@ import DashboardHeader from "../../components/dashboard/DashboardHeader";
 import StatsCard from "../../components/dashboard/StatsCard";
 import BalanceCard from "../../components/dashboard/BalanceCard";
 import RecentTransactions from "../../components/dashboard/RecentTransactions";
-import Spinner from "../../components/common/Spinner";
-import ErrorState from "../../components/common/ErrorState";
+
+import ErrorState from "../../components/ui/ErrorState";
+import { Wallet, ArrowRightLeft, Activity } from "lucide-react";
+
+import DashboardSkeleton from "../../components/dashboard/DashboardSkeleton";
 
 import { useAccounts } from "../../hooks/useAccounts";
 import { usePayments } from "../../hooks/usePayments";
@@ -24,7 +27,7 @@ export default function Dashboard() {
 
   const { health, loading: healthLoading } = useHealth();
   if (accountsLoading || paymentsLoading || healthLoading) {
-    return <Spinner />;
+    return <DashboardSkeleton />;
   }
 
   if (accountsError || paymentsError) {
@@ -39,16 +42,37 @@ export default function Dashboard() {
       <DashboardHeader />
 
       <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
-        <StatsCard title="Accounts" value={accounts.length} />
+        <StatsCard
+          title="Accounts"
+          value={accounts.length}
+          subtitle="Active wallets"
+          icon={<Wallet size={24} />}
+        />
 
-        <StatsCard title="Transactions" value={payments.length} />
+        <StatsCard
+          title="Transactions"
+          value={payments.length}
+          subtitle="Processed payments"
+          icon={<ArrowRightLeft size={24} />}
+        />
 
-        <StatsCard title="API Status" value={health?.status ?? "Unknown"} />
+        <StatsCard
+          title="API Status"
+          value={health?.status ?? "Unknown"}
+          subtitle="Backend health"
+          icon={<Activity size={24} />}
+        />
       </div>
 
-      <BalanceCard accounts={accounts} />
+      <div className="grid grid-cols-1 gap-6 xl:grid-cols-3">
+        <div className="xl:col-span-2">
+          <BalanceCard accounts={accounts} />
+        </div>
 
-      <RecentTransactions payments={payments} />
+        <div>
+          <RecentTransactions payments={payments} />
+        </div>
+      </div>
     </div>
   );
 }

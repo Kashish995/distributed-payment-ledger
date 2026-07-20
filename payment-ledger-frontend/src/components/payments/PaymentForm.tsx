@@ -5,9 +5,10 @@ import toast from "react-hot-toast";
 import { useAccounts } from "../../hooks/useAccounts";
 import { createPayment } from "../../api/paymentApi";
 
-import Spinner from "../common/Spinner";
-import ErrorState from "../common/ErrorState";
-
+import Spinner from "../ui/Spinner";
+import ErrorState from "../ui/ErrorState";
+import { Input } from "../ui/Input";
+import { Select } from "../ui/Select";
 type PaymentFormData = {
   senderAccountId: string;
   receiverAccountId: string;
@@ -58,8 +59,7 @@ export default function PaymentForm() {
       });
     } catch (err: any) {
       const message =
-        err?.response?.data?.message ??
-        "Failed to process payment.";
+        err?.response?.data?.message ?? "Failed to process payment.";
 
       toast.error(message);
     } finally {
@@ -76,64 +76,47 @@ export default function PaymentForm() {
   }
 
   return (
-    <form
-      onSubmit={handleSubmit(onSubmit)}
-      className="space-y-6"
-    >
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
       {/* Sender */}
       <div>
-        <label className="mb-2 block font-medium">
-          Sender Account
-        </label>
-
-        <select
+        <Select
+          id="senderAccountId"
+          label="Sender Account"
+          error={errors.senderAccountId?.message}
           {...register("senderAccountId", {
             required: "Please select a sender account",
           })}
-          className="w-full rounded-lg border p-3"
         >
           <option value="">Select sender</option>
 
           {availableAccounts.map((account) => (
-            <option
-              key={account.id}
-              value={account.id}
-            >
+            <option key={account.id} value={account.id}>
               {account.ownerName}
             </option>
           ))}
-        </select>
-
-        {errors.senderAccountId && (
-          <p className="mt-1 text-sm text-red-500">
-            {errors.senderAccountId.message}
-          </p>
-        )}
+        </Select>
       </div>
 
       {/* Receiver */}
       <div>
-        <label className="mb-2 block font-medium">
-          Receiver Account
-        </label>
+        <label className="mb-2 block font-medium">Receiver Account</label>
 
-        <select
+        <Select
+          id="receiverAccountId"
+          label="Receiver Account"
+          error={errors.receiverAccountId?.message}
           {...register("receiverAccountId", {
             required: "Please select a receiver account",
           })}
-          className="w-full rounded-lg border p-3"
         >
           <option value="">Select receiver</option>
 
           {availableAccounts.map((account) => (
-            <option
-              key={account.id}
-              value={account.id}
-            >
+            <option key={account.id} value={account.id}>
               {account.ownerName}
             </option>
           ))}
-        </select>
+        </Select>
 
         {errors.receiverAccountId && (
           <p className="mt-1 text-sm text-red-500">
@@ -144,14 +127,12 @@ export default function PaymentForm() {
 
       {/* Amount */}
       <div>
-        <label className="mb-2 block font-medium">
-          Amount
-        </label>
-
-        <input
+        <Input
+          id="amount"
           type="number"
+          label="Amount"
           placeholder="100"
-          className="w-full rounded-lg border p-3"
+          error={errors.amount?.message}
           {...register("amount", {
             valueAsNumber: true,
             required: "Amount is required",
@@ -161,26 +142,13 @@ export default function PaymentForm() {
             },
           })}
         />
-
-        {errors.amount && (
-          <p className="mt-1 text-sm text-red-500">
-            {errors.amount.message}
-          </p>
-        )}
       </div>
 
       {/* Currency */}
       <div>
-        <label className="mb-2 block font-medium">
-          Currency
-        </label>
-
-        <select
-          {...register("currency")}
-          className="w-full rounded-lg border p-3"
-        >
+        <Select id="currency" label="Currency" {...register("currency")}>
           <option value="INR">INR</option>
-        </select>
+        </Select>
       </div>
 
       <button

@@ -16,8 +16,8 @@ describe("Payment API", () => {
         .post("/payments")
         .set("Idempotency-Key", "payment-api-test-001")
         .send({
-          senderAccountId: "00000000-0000-0000-0000-000000000000",
-          receiverAccountId: "00000000-0000-0000-0000-000000000001",
+          senderAccountId: "550e8400-e29b-41d4-a716-446655440011",
+          receiverAccountId: "550e8400-e29b-41d4-a716-446655440012",
           amount: 100,
           currency: "INR",
         });
@@ -31,8 +31,8 @@ describe("Payment API", () => {
 
     it("should reject duplicate idempotency key", async () => {
       const paymentRequest = {
-        senderAccountId: "00000000-0000-0000-0000-000000000000",
-        receiverAccountId: "00000000-0000-0000-0000-000000000001",
+        senderAccountId: "550e8400-e29b-41d4-a716-446655440011",
+        receiverAccountId: "550e8400-e29b-41d4-a716-446655440012",
         amount: 100,
         currency: "INR",
       };
@@ -62,8 +62,8 @@ describe("Payment API", () => {
 
     it("should reject payment with insufficient funds", async () => {
       const paymentRequest = {
-        senderAccountId: "00000000-0000-0000-0000-000000000000",
-        receiverAccountId: "00000000-0000-0000-0000-000000000001",
+        senderAccountId: "550e8400-e29b-41d4-a716-446655440011",
+        receiverAccountId: "550e8400-e29b-41d4-a716-446655440012",
         amount: 5000,
         currency: "INR",
       };
@@ -87,12 +87,12 @@ describe("Payment API", () => {
 
         const aliceBalance = await accountRepository.getAccountBalance(
           client,
-          "00000000-0000-0000-0000-000000000000",
+          "550e8400-e29b-41d4-a716-446655440011",
         );
 
         const bobBalance = await accountRepository.getAccountBalance(
           client,
-          "00000000-0000-0000-0000-000000000001",
+          "550e8400-e29b-41d4-a716-446655440012",
         );
 
         expect(aliceBalance).toBe(1000);

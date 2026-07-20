@@ -1,6 +1,6 @@
-import Card from "../../components/common/Card";
-import Spinner from "../../components/common/Spinner";
-import ErrorState from "../../components/common/ErrorState";
+import { Card } from "../../components/ui/Card";
+import Spinner from "../../components/ui/Spinner";
+import ErrorState from "../../components/ui/ErrorState";
 
 import { usePayments } from "../../hooks/usePayments";
 

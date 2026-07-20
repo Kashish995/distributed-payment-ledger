@@ -13,8 +13,8 @@ describe("Concurrency Tests", () => {
   describe("Same Idempotency Key", () => {
     it("should allow only one request with the same idempotency key", async () => {
       const paymentRequest = {
-        senderAccountId: "00000000-0000-0000-0000-000000000000",
-        receiverAccountId: "00000000-0000-0000-0000-000000000001",
+        senderAccountId: "550e8400-e29b-41d4-a716-446655440011",
+        receiverAccountId: "550e8400-e29b-41d4-a716-446655440012",
         amount: 100,
         currency: "INR",
       };
@@ -46,8 +46,8 @@ describe("Concurrency Tests", () => {
   describe("Concurrent Payments", () => {
     it("should prevent double spending under concurrent requests", async () => {
       const paymentRequest = {
-        senderAccountId: "00000000-0000-0000-0000-000000000000",
-        receiverAccountId: "00000000-0000-0000-0000-000000000001",
+        senderAccountId: "550e8400-e29b-41d4-a716-446655440011",
+        receiverAccountId: "550e8400-e29b-41d4-a716-446655440012",
         amount: 100,
         currency: "INR",
       };
@@ -79,12 +79,12 @@ describe("Concurrency Tests", () => {
 
         const aliceBalance = await accountRepository.getAccountBalance(
           client,
-          "00000000-0000-0000-0000-000000000000",
+          "550e8400-e29b-41d4-a716-446655440011",
         );
 
         const bobBalance = await accountRepository.getAccountBalance(
           client,
-          "00000000-0000-0000-0000-000000000001",
+          "550e8400-e29b-41d4-a716-446655440012",
         );
 
         expect(aliceBalance).toBe(0);

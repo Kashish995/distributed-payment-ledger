@@ -3,6 +3,10 @@ import { ZodSchema } from "zod";
 
 export function validateRequest(schema: ZodSchema) {
   return (req: Request, res: Response, next: NextFunction): void => {
+    console.log("Request body:", req.body);
+    console.log("SenderAccountId type:", typeof req.body.senderAccountId);
+    console.log("ReceiverAccountId type:", typeof req.body.receiverAccountId);
+
     const result = schema.safeParse(req.body);
 
     if (!result.success) {

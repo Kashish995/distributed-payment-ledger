@@ -33,8 +33,8 @@ describe("PaymentRepository", () => {
       await paymentRepository.createLedgerEntries(
         client,
         transactionId,
-        "00000000-0000-0000-0000-000000000000", // Alice
-        "00000000-0000-0000-0000-000000000001", // Bob
+        "550e8400-e29b-41d4-a716-446655440011", // Alice
+        "550e8400-e29b-41d4-a716-446655440012", // Bob
         100,
         "INR",
       );
@@ -67,7 +67,7 @@ describe("PaymentRepository", () => {
 
       expect(debitEntry).toMatchObject({
         transaction_id: transactionId,
-        account_id: "00000000-0000-0000-0000-000000000000",
+        account_id: "550e8400-e29b-41d4-a716-446655440011",
         amount: "-100.00",
         entry_type: "DEBIT",
         currency: "INR",
@@ -75,7 +75,7 @@ describe("PaymentRepository", () => {
 
       expect(creditEntry).toMatchObject({
         transaction_id: transactionId,
-        account_id: "00000000-0000-0000-0000-000000000001",
+        account_id: "550e8400-e29b-41d4-a716-446655440012",
         amount: "100.00",
         entry_type: "CREDIT",
         currency: "INR",

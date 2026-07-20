@@ -1,5 +1,5 @@
-import Card from "../../components/common/Card";
-import Spinner from "../../components/common/Spinner";
+import { Card } from "../../components/ui/Card";
+import Spinner from "../../components/ui/Spinner";
 
 import { useHealth } from "../../hooks/useHealth";
 

@@ -21,7 +21,7 @@ describe("AccountRepository", () => {
     it("should return the correct balance for Alice", async () => {
       const balance = await accountRepository.getAccountBalance(
         client,
-        "00000000-0000-0000-0000-000000000000",
+        "550e8400-e29b-41d4-a716-446655440011",
       );
 
       expect(balance).toBe(1000);
