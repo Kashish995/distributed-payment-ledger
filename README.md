@@ -1,393 +1,409 @@
-# Distributed Payment Ledger
+# 💳 Distributed Payment Ledger
 
-A production-oriented payment ledger backend built with **Node.js, TypeScript, PostgreSQL, and Redis**, demonstrating concepts used in modern payment systems such as **idempotency, ACID transactions, row-level locking, and double-entry accounting**.
+A production-inspired distributed payment ledger that simulates core payment infrastructure using **immutable double-entry accounting**, **idempotent request processing**, **ACID transactions**, and **PostgreSQL row-level locking**.
 
-> Designed as a backend engineering project to showcase scalable architecture, transaction consistency, concurrency handling, and production-ready development practices.
-
----
-
-## Features
-
-- Double-entry accounting ledger
-- Exactly-once payment processing using Redis idempotency
-- PostgreSQL ACID transactions
-- Row-level locking (`FOR UPDATE`) to prevent race conditions
-- Immutable append-only ledger
-- RESTful APIs
-- Request validation with Zod
-- Structured logging with Pino
-- Swagger/OpenAPI documentation
-- Health check endpoint
-- Unit tests
-- Integration tests
-- Concurrency testing
-- GitHub Actions CI
-- Layered architecture (Controller → Service → Repository)
+The project demonstrates how modern payment systems maintain consistency, prevent duplicate transactions, and safely process concurrent requests.
 
 ---
 
-# Tech Stack
+## 🚀 Live Demo
 
-### Backend
+### 🌐 Frontend Dashboard
+
+**https://YOUR_VERCEL_LINK.vercel.app**
+
+### ⚙️ Backend API
+
+**https://distributed-payment-ledger.onrender.com**
+
+### 📖 Swagger API Documentation
+
+**https://distributed-payment-ledger.onrender.com/api-docs**
+
+---
+
+# ✨ Features
+
+- 💰 Immutable Double-Entry Accounting Ledger
+- 🔒 PostgreSQL ACID Transactions
+- ⚡ Row-Level Locking (`SELECT ... FOR UPDATE`)
+- 🔁 Idempotent Payment Processing using Redis
+- 📊 Real-time Account Balance Calculation
+- 🏗 Clean Architecture
+- 📦 Repository Pattern
+- 🧩 Service Layer Architecture
+- 📝 Swagger API Documentation
+- 🎨 Modern React Dashboard
+- 🌍 Fully Deployed Full Stack Application
+
+---
+
+# 🏗 System Architecture
+
+```
+                React Dashboard
+                      │
+                      ▼
+               Express REST API
+                      │
+       ┌──────────────┴──────────────┐
+       ▼                             ▼
+ Payment Service              Account Service
+       │                             │
+       ▼                             ▼
+ Repository Layer             Repository Layer
+               │
+               ▼
+      PostgreSQL + Redis
+```
+
+---
+
+# ⚙ Tech Stack
+
+## Backend
 
 - Node.js
-- TypeScript
 - Express.js
-
-### Database
-
+- TypeScript
 - PostgreSQL
-
-### Caching
-
 - Redis
+- Swagger UI
+- Pino Logger
 
-### Validation
+## Frontend
 
-- Zod
+- React
+- TypeScript
+- Vite
+- Axios
+- React Router
+- Tailwind CSS
 
-### Logging
+## Deployment
 
-- Pino
-
-### API Documentation
-
-- Swagger (OpenAPI)
-
-### Testing
-
-- Jest
-- Supertest
-
-### CI/CD
-
-- GitHub Actions
+- Render
+- Vercel
+- Neon PostgreSQL
+- Upstash Redis
 
 ---
 
-# Project Architecture
+# 📂 Project Structure
 
 ```
-Client
-   │
-   ▼
-Routes
-   │
-   ▼
-Controllers
-   │
-   ▼
-Services
-   │
-   ▼
-Repositories
-   │
-   ▼
-PostgreSQL
+distributed-payment-ledger/
+│
+├── database/
+│   ├── schema.sql
+│   └── seed.sql
+│
+├── src/
+│   ├── config/
+│   ├── controllers/
+│   ├── middleware/
+│   ├── repositories/
+│   ├── routes/
+│   ├── services/
+│   ├── types/
+│   └── utils/
+│
+├── payment-ledger-frontend/
+│
+├── docker-compose.yml
+├── package.json
+└── README.md
 ```
 
 ---
 
-# Payment Processing Flow
+# 💳 Payment Processing Flow
 
 ```
 Client
+
    │
+
 POST /payments
+
    │
-   ▼
-Validation Middleware
+
+Idempotency Middleware
+
    │
-   ▼
-Idempotency Middleware (Redis)
-   │
-   ▼
+
 Payment Controller
+
    │
-   ▼
+
 Payment Service
+
    │
-   ├── BEGIN TRANSACTION
-   ├── Lock Sender Account
-   ├── Validate Balance
-   ├── Create Ledger Entries
-   └── COMMIT
+
+BEGIN TRANSACTION
+
    │
-   ▼
-Response
+
+Lock Sender Account
+(SELECT ... FOR UPDATE)
+
+   │
+
+Validate Balance
+
+   │
+
+Insert Debit Entry
+
+   │
+
+Insert Credit Entry
+
+   │
+
+COMMIT
+
+   │
+
+Return Response
 ```
 
 ---
 
-# Database Design
+# 📒 Ledger Design
 
-## Accounts
+Instead of updating balances directly, every payment creates immutable ledger entries.
 
-Stores account information.
+Example:
 
-```
-accounts
---------
-id
-owner_name
-currency
-created_at
-```
+| Account | Entry Type | Amount |
+|----------|-----------|--------:|
+| Alice | Debit | -500 |
+| Bob | Credit | +500 |
 
-## Ledger Entries
+Current balances are calculated by summing all ledger entries.
 
-Immutable append-only ledger.
+This approach provides:
 
-```
-ledger_entries
---------------
-id
-transaction_id
-account_id
-amount
-entry_type
-currency
-created_at
-```
-
-Each payment creates:
-
-- one DEBIT entry
-- one CREDIT entry
-
-ensuring accounting integrity.
+- Complete transaction history
+- Auditability
+- Financial consistency
+- Immutable records
 
 ---
 
-# API Endpoints
+# 🔄 Idempotency
 
-## Payments
+Every payment request can include an `Idempotency-Key`.
 
-### Process Payment
+If the same request is submitted multiple times:
 
-```
-POST /payments
-```
-
-Transfers funds between two accounts using double-entry accounting.
+- The transaction executes only once.
+- Duplicate requests return the cached response.
+- Prevents accidental double payments.
 
 ---
 
-### Payment History
+# 🔐 Concurrency Handling
+
+To prevent race conditions during simultaneous payment requests, the project uses PostgreSQL row-level locking.
 
 ```
-GET /payments
+SELECT ...
+FOR UPDATE
 ```
 
-Returns processed payments reconstructed from the immutable ledger.
+This guarantees that only one transaction can modify an account balance at a time.
 
 ---
 
-## Accounts
-
-```
-GET /accounts
-```
-
-Returns all accounts along with balances calculated from ledger entries.
-
----
+# 📖 API Endpoints
 
 ## Health
 
-```
+```http
 GET /health
 ```
 
-Returns application health status.
+---
+
+## Accounts
+
+```http
+GET /accounts
+```
+
+Returns all accounts with calculated balances.
 
 ---
 
-## API Documentation
+## Payments
 
+```http
+GET /payments
 ```
+
+Returns payment history.
+
+```http
+POST /payments
+```
+
+Creates a new payment transaction.
+
+---
+
+## Swagger Documentation
+
+```http
 GET /api-docs
 ```
 
-Interactive Swagger UI.
+Interactive API documentation.
 
 ---
 
-# Idempotency
+# 🗄 Database
 
-The API supports exactly-once payment processing.
+## Tables
 
-Clients send:
+- accounts
+- ledger_entries
 
-```
-Idempotency-Key: unique-key
-```
+## Concepts Used
 
-Duplicate requests with the same key are rejected while preserving transaction consistency.
-
----
-
-# Concurrency Control
-
-To prevent race conditions:
-
-- PostgreSQL transactions
-- Row-level locking (`SELECT ... FOR UPDATE`)
-- Atomic ledger updates
-- Redis idempotency locks
-
-These mechanisms ensure multiple concurrent payment requests cannot corrupt balances.
+- UUID Primary Keys
+- Foreign Keys
+- Transactions
+- Constraints
+- Indexes
+- Row-Level Locks
+- Immutable Ledger Entries
 
 ---
 
-# Project Structure
+# 🌍 Deployment
 
-```
-src
-├── config
-├── controllers
-├── middleware
-├── repositories
-├── routes
-├── services
-├── validation
-├── errors
-├── types
-├── app.ts
-└── server.ts
-
-database
-├── schema.sql
-└── seed.sql
-```
+| Service | Platform |
+|---------|----------|
+| Frontend | Vercel |
+| Backend | Render |
+| Database | Neon PostgreSQL |
+| Cache | Upstash Redis |
 
 ---
 
-# Getting Started
+# 🚀 Running Locally
 
-## Clone
+## Clone Repository
 
 ```bash
-git clone https://github.com/<your-username>/distributed-payment-ledger.git
-
-cd distributed-payment-ledger
+git clone https://github.com/YOUR_GITHUB_USERNAME/distributed-payment-ledger.git
 ```
 
 ---
 
-## Install
+## Backend
 
 ```bash
 npm install
-```
 
----
-
-## Environment Variables
-
-Create a `.env` file.
-
-```
-PORT=3000
-
-DB_HOST=localhost
-DB_PORT=5433
-DB_NAME=payment_ledger
-DB_USER=postgres
-DB_PASSWORD=your_password
-
-REDIS_HOST=localhost
-REDIS_PORT=6379
-```
-
----
-
-## Start PostgreSQL & Redis
-
-```bash
-docker compose up -d
-```
-
----
-
-## Run Development Server
-
-```bash
 npm run dev
 ```
 
 ---
 
-# Testing
+## Frontend
 
-Unit Tests
+```bash
+cd payment-ledger-frontend
+
+npm install
+
+npm run dev
+```
+
+---
+
+# 🔑 Environment Variables
+
+## Backend
+
+```env
+PORT=3000
+
+DATABASE_URL=
+
+REDIS_URL=
+```
+
+---
+
+## Frontend
+
+```env
+VITE_API_BASE_URL=https://distributed-payment-ledger.onrender.com
+```
+
+---
+
+# 🧪 Testing
+
+The project includes:
+
+- Repository Tests
+- Service Tests
+- Integration Tests
+- API Validation
+
+Run tests:
 
 ```bash
 npm test
 ```
 
-Integration Tests
+---
 
-```bash
-npm run test:integration
-```
+# 🚧 Future Improvements
+
+- JWT Authentication
+- Multi-Currency Support
+- WebSocket Notifications
+- Docker Production Deployment
+- CI/CD Pipeline
+- Prometheus Metrics
+- Grafana Monitoring
+- Rate Limiting
+- Kubernetes Deployment
 
 ---
 
-# CI
+# 🎯 Learning Outcomes
 
-GitHub Actions automatically:
+This project demonstrates practical experience with:
 
-- Install dependencies
-- Build project
-- Execute unit tests
-- Execute integration tests
-
-on every push and pull request.
-
----
-
-# Future Improvements
-
-- React frontend
-- Authentication & authorization
-- Docker deployment
-- Metrics & monitoring
-- Rate limiting
-- Pagination for payment history
-- Webhooks
-- Multi-currency exchange support
+- Distributed Payment Systems
+- Financial Ledger Design
+- Backend Architecture
+- Transaction Management
+- Database Concurrency Control
+- Redis Caching
+- REST API Development
+- Full Stack Deployment
+- Production-Oriented Software Engineering
 
 ---
 
-# Learning Outcomes
+# 👨‍💻 Author
 
-This project demonstrates practical implementation of:
+**Your Name**
 
-- Distributed systems concepts
-- Financial ledger design
-- Exactly-once processing
-- Transaction management
-- PostgreSQL locking
-- Redis idempotency
-- Clean Architecture
-- Repository Pattern
-- REST API design
-- Backend testing strategies
+GitHub: https://github.com/YOUR_GITHUB_USERNAME
+
+LinkedIn: https://linkedin.com/in/YOUR_LINKEDIN
 
 ---
 
-# Screenshots
+# 📄 License
 
-Coming soon.
-
-- Dashboard
-- Swagger UI
-- Payment API
-- Transaction History
-
----
-
-# License
-
-MIT License
+This project is licensed under the MIT License.
