@@ -10,7 +10,7 @@ The project demonstrates how modern payment systems maintain consistency, preven
 
 ### 🌐 Frontend Dashboard
 
-**https://YOUR_VERCEL_LINK.vercel.app**
+**https://distributed-payment-ledger.vercel.app/dashboard**
 
 ### ⚙️ Backend API
 
